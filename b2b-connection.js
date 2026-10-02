@@ -1,0 +1,3 @@
+// Set to the deployed Apps Script web app /exec URL after the owner deploys it.
+const KLAMAS_B2B_URL='';
+(()=>{const original=b2bLogin;b2bLogin=function(){original();const card=document.querySelector('.b2b-login-card');if(!card)return;const p=document.createElement('p');if(/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(KLAMAS_B2B_URL)){const a=document.createElement('a');a.href=KLAMAS_B2B_URL;a.className='primary';a.textContent='Войти в кабинет компании';a.target='_blank';a.rel='noopener';card.prepend(a);p.textContent='Для входа используйте email и личный ключ, полученный у менеджера.';}else{p.textContent='Вход компаний подключается. Сейчас доступен просмотр демо-кабинета.';}card.append(p);};})();
