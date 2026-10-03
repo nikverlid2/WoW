@@ -10,7 +10,7 @@ export function createSoftwareRenderer(T) {
     const g=c.getContext('2d');g.drawImage(map.image,0,0);
     const t={data:g.getImageData(0,0,c.width,c.height).data,w:c.width,h:c.height};textures.set(map,t);return t;
   }
-  return {domElement:canvas,isSoftware:true,shadowMap:{},setPixelRatio:r=>{ratio=Math.min(r,1)},setSize(w,h){width=Math.round(w*ratio);height=Math.round(h*ratio);canvas.width=width;canvas.height=height;canvas.style.width=w+'px';canvas.style.height=h+'px';buffer=ctx.createImageData(width,height);depth=new Float32Array(width*height)},render(scene,camera){
+  return {domElement:canvas,isSoftware:true,shadowMap:{},setPixelRatio:r=>{ratio=Math.min(r,1.65)},setSize(w,h){width=Math.round(w*ratio);height=Math.round(h*ratio);canvas.width=width;canvas.height=height;canvas.style.width=w+'px';canvas.style.height=h+'px';buffer=ctx.createImageData(width,height);depth=new Float32Array(width*height)},render(scene,camera){
     if(!buffer)return;depth.fill(Infinity);buffer.data.fill(0);
     scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
     const light=new T.Vector3(-.4,.85,.6).normalize(),v=new T.Vector3(),normal=new T.Vector3(),edge=new T.Vector3(),view=new T.Vector3();
@@ -27,11 +27,12 @@ export function createSoftwareRenderer(T) {
         const p=new T.Vector4(a.x,a.y,a.z,1).applyMatrix4(vp),q=1/p.w;
         proj.push([(p.x*q*.5+.5)*width,(.5-p.y*q*.5)*height,p.z*q,q,uv?uv.getX(i)*q:0,uv?uv.getY(i)*q:0]);
       }
+      const center=new T.Vector3();o.getWorldPosition(center);view.subVectors(camera.position,center).normalize();
       const count=idx?idx.count:pos.count;
       for(let j=0;j<count;j+=3){
         const ai=idx?idx.getX(j):j,bi=idx?idx.getX(j+1):j+1,ci=idx?idx.getX(j+2):j+2;
         normal.subVectors(world[bi],world[ai]).cross(edge.subVectors(world[ci],world[ai])).normalize();
-        view.subVectors(camera.position,world[ai]).normalize();if(normal.dot(view)<=0&&mat.side!==T.DoubleSide)continue;
+        if(normal.dot(view)<=0&&mat.side!==T.DoubleSide)continue;
         const a=proj[ai],b=proj[bi],c=proj[ci];if(a[2]>1||b[2]>1||c[2]>1||a[3]<0||b[3]<0||c[3]<0)continue;
         const den=(b[1]-c[1])*(a[0]-c[0])+(c[0]-b[0])*(a[1]-c[1]);if(Math.abs(den)<.00001)continue;
         const x0=Math.max(0,Math.floor(Math.min(a[0],b[0],c[0]))),x1=Math.min(width-1,Math.ceil(Math.max(a[0],b[0],c[0])));

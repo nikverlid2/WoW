@@ -97,7 +97,7 @@ render();
 
 async function start3D(){
 try{
- const {createServerScene}=await import('./server-scene.js?v=4');
+ const {createServerScene}=await import('./server-scene.js?v=5');
  model=await createServerScene({host:$('server-scene'),getState:()=>({...state,cpuCores:option('cpu').cores,cpuW:option('cpu').w,driveTB:option('drive').tb,psuW:option('psu').w})});
  model.focus('cpu');$('server-loading').hidden=true;
  $('cover').onclick=()=>{const open=model.cover();$('cover').setAttribute('aria-pressed',open);$('cover').textContent=open?'Без крышки':'С крышкой';$('explode').setAttribute('aria-pressed','false');$('inspect').setAttribute('aria-pressed','false')};
