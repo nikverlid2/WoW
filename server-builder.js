@@ -130,7 +130,7 @@ const mat={
  led:new T.MeshStandardMaterial({color:0x48f4bf,emissive:0x20a873,emissiveIntensity:.6}),
  trace:new T.MeshStandardMaterial({color:0x548879,metalness:.4,roughness:.6})
 };
-function box(parent,w,h,d,x,y,z,m){const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+function box(parent,w,h,d,x,y,z,m){const o=new T.Mesh(new T.BoxGeometry(w,h,d,Math.max(1,Math.ceil(w/.45)),Math.max(1,Math.ceil(h/.45)),Math.max(1,Math.ceil(d/.45))),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
 function cyl(parent,r,h,x,y,z,m){const o=new T.Mesh(new T.CylinderGeometry(r,r,h,16),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
 function screw(parent,x,y,z){cyl(parent,.033,.015,x,y,z,mat.silver);box(parent,.039,.005,.007,x,y+.01,z,mat.black)}
 function label(parent,text,w,h,x,y,z,flat=false){
@@ -217,7 +217,7 @@ coverMesh=box(root,4.23,.055,6.48,0,coverOpen?2.4:.97,0,mat.metal);coverMesh.vis
 if(exploded)coverMesh.position.y=3;
 draw();
 }
-let theta=.65,phi=.89,distance=11.7,needs=true;
+let theta=.65,phi=.89,distance=12.5,needs=true;
 function cameraUpdate(){camera.position.set(Math.sin(theta)*Math.sin(phi)*distance,Math.cos(phi)*distance+1,Math.cos(theta)*Math.sin(phi)*distance);camera.lookAt(0,exploded?.8:.25,0);camera.updateMatrixWorld()}
 function draw(){
 cameraUpdate();renderer.render(scene,camera);
@@ -242,7 +242,7 @@ renderer.domElement.addEventListener('wheel',e=>{e.preventDefault();distance=Mat
 renderer.domElement.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','='].includes(e.key)){e.preventDefault();theta+=e.key==='ArrowLeft'?-.1:e.key==='ArrowRight'?.1:0;phi=Math.max(.12,Math.min(1.48,phi+(e.key==='ArrowUp'?-.1:e.key==='ArrowDown'?.1:0)));distance=Math.max(7,Math.min(19,distance+(e.key==='-'?.5:['+','='].includes(e.key)?-.5:0)));draw()}});
 $('cover').onclick=()=>{coverOpen=!coverOpen;$('cover').setAttribute('aria-pressed',coverOpen);$('cover').textContent=coverOpen?'Без крышки':'С крышкой';rebuild()};
 $('explode').onclick=()=>{exploded=!exploded;if(exploded){coverOpen=true;$('cover').textContent='Без крышки';$('cover').setAttribute('aria-pressed','true')}$('explode').setAttribute('aria-pressed',exploded);rebuild()};
-$('front').onclick=()=>{theta=0;phi=1.40;draw()};$('top').onclick=()=>{phi=.12;theta=0;draw()};$('reset-view').onclick=()=>{theta=.65;phi=.89;distance=11.7;draw()};
+$('front').onclick=()=>{theta=0;phi=1.40;draw()};$('top').onclick=()=>{phi=.12;theta=0;draw()};$('reset-view').onclick=()=>{theta=.65;phi=.89;distance=12.5;draw()};
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();$('server-loading').hidden=false;$('server-loading').textContent='3D-контекст потерян. Обновите страницу; сохранённая сборка останется.'});
 model={rebuild};$('server-loading').hidden=true;rebuild();resize();
 }catch(err){$('server-loading').innerHTML='Не удалось открыть 3D. Проверьте доступ к сети и поддержку WebGL в браузере.<br>Выбор компонентов и расчёт доступны справа.<button class="tool" id="retry-3d">Повторить загрузку 3D</button>';$('retry-3d').onclick=()=>location.reload();console.error('Server 3D:',err)}

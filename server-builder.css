@@ -3,3 +3,5 @@
 @media(max-width:1050px){.layout{grid-template-columns:1.2fr 1fr;gap:15px}.scene{height:415px}.intro{align-items:start;flex-direction:column}.row{padding:12px;gap:9px;grid-template-columns:35px 1fr auto}.row svg{width:33px}}
 @media(max-width:760px){header{padding:15px 5%}header nav{gap:12px;font-size:11px}.layout{display:block;padding:0 4% 25px}.visual{position:relative;top:0;margin-bottom:20px}.scene{height:370px}.intro{padding-top:24px}.specs b{font-size:17px}.tools{gap:5px;padding:12px}.tool{font-size:11px;padding:9px}.row{grid-template-columns:43px 1fr auto;padding:16px}.row svg{width:40px}.choices{gap:9px}.choice{padding:14px}.choice.selected{padding:13px}dialog{padding:22px}.dialog-head h2{font-size:23px}.specs{padding:15px}.scene-head{font-size:10px}}
 @media(max-width:390px){.scene{height:320px}.choices{grid-template-columns:1fr}.specs b{font-size:15px}}
+
+[hidden]{display:none!important}
