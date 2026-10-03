@@ -22,3 +22,6 @@ footer.corp-footer{display:block;height:auto!important;background:#242c30;color:
 header .logo{position:relative;z-index:1;cursor:pointer}
 @media(max-width:900px){.corp-hero{padding:32px;grid-template-columns:1.2fr 1fr}.corp-hardware{min-height:275px}}
 @media(max-width:600px){.corp-hero{grid-template-columns:1fr;padding:28px;gap:10px}.corp-hero h1{font-size:36px;letter-spacing:-1px}.corp-hardware{min-height:230px;margin:0 auto 20px;width:min(100%,350px)}.corp-hardware-pc{right:0}.corp-hardware-laptop{left:-4%}}
+
+/* Programmatic heading focus must not draw a frame around the hero text. */
+.corp-hero h1:focus{outline:none}

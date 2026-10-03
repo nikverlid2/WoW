@@ -3,7 +3,7 @@
 'use strict';
 const groups=[
 ['Решения','Техника под вашу задачу','От одного компьютера до рабочих мест для команды.',[
-['solutions','Все решения','Выберите сценарий использования'],['workplaces','Рабочие места','Компьютеры, мониторы и периферия'],['networks','Сети и Wi-Fi','Подключение дома и в офисе'],['russian','Российские решения','Что учесть при выборе аналогов'],['#pc-builder','Конфигуратор ПК','Комплектующие и расчёт сборки']]],
+['solutions','Все решения','Выберите сценарий использования'],['workplaces','Рабочие места','Компьютеры, мониторы и периферия'],['networks','Сети и Wi-Fi','Подключение дома и в офисе'],['russian','Российские решения','Что учесть при выборе аналогов'],['#pc-builder','Конфигуратор ПК','Комплектующие и расчёт сборки'],['server-builder.html','Конфигуратор сервера','Объёмная модель 2U и подбор компонентов']]],
 ['Сервисы','Удобно на каждом этапе','Подбор, получение и сопровождение покупки.',[
 ['services','Все сервисы','Как пользоваться возможностями сайта'],['delivery','Доставка и получение','Подготовка и проверка поставки'],['payment','Оплата и документы','Счета, платежи и закрывающие документы'],['support','Гарантия и поддержка','Как подготовить обращение']]],
 ['Бизнесу','Закупки в одном месте','Информация для корпоративных клиентов.',[
@@ -13,7 +13,7 @@ const groups=[
 ['Компания','Кламас','Компьютерная и цифровая техника. Уфа.',[
 ['about','О компании','Наши направления и подход'],['contacts','Контакты','Как связаться по вашему вопросу'],['details','Реквизиты и документы','Где найти данные контрагента']]]
 ];
-const link=(id,label)=>'<a href="'+(id.startsWith('#')?id:'#/'+id)+'">'+label+'</a>';
+const link=(id,label)=>'<a href="'+((id.startsWith('#')||id.endsWith('.html'))?id:'#/'+id)+'">'+label+'</a>';
 const cards=(rows)=>'<div class="corp-cards">'+rows.map(r=>'<article class="corp-card"><h2>'+r[0]+'</h2><p>'+r[1]+'</p>'+(r[2]?link(r[2],r[3]||'Подробнее'):'')+'</article>').join('')+'</div>';
 const faq=(rows)=>'<div class="corp-faq">'+rows.map(r=>'<details><summary>'+r[0]+'</summary><p>'+r[1]+'</p></details>').join('')+'</div>';
 const notice=t=>'<div class="corp-status">'+t+'</div>';
@@ -46,6 +46,7 @@ home.id='storefront';
 document.querySelectorAll('header .logo,footer .logo').forEach(a=>{a.href='#/about';a.setAttribute('aria-label','Кламас — о компании')});
 const oldInfo=home.querySelector('.info-grid');if(oldInfo)oldInfo.remove();
 const feature=document.createElement('section');feature.className='corp-feature';feature.innerHTML='<div><span class="corp-eyebrow" style="color:#b44b2b">КЛАМАС / КОМПАНИЯ</span><h2>Техника для жизни<br>и ваших задач.</h2><p>Узнайте о направлениях Кламас, возможностях кабинета и порядке работы с закупками.</p>'+link('about','О компании →')+'</div><div class="corp-feature-links">'+link('solutions','Решения <span>→</span>')+link('services','Сервисы <span>→</span>')+link('business','Корпоративным клиентам <span>→</span>')+link('contacts','Контакты <span>→</span>')+'</div>';home.append(feature);
+const serverEntry=document.createElement('section');serverEntry.className='corp-feature';serverEntry.innerHTML='<div><span class="corp-eyebrow" style="color:#b44b2b">КОНФИГУРАТОР / СЕРВЕРЫ</span><h2>Сервер под вашу нагрузку.</h2><p>Объёмная модель 2U, выбор процессоров, памяти и накопителей. Расчёт массива и питания с резервированием.</p><a class="primary" href="server-builder.html">Собрать сервер</a></div><div class="corp-feature-links"><a href="server-builder.html">Офис и рабочие сервисы <span>→</span></a><a href="server-builder.html">Виртуализация <span>→</span></a><a href="server-builder.html">Хранение данных <span>→</span></a></div>';feature.before(serverEntry);
 const top=document.querySelector('.top div');if(top)top.innerHTML=link('business','Бизнесу')+link('contacts','Контакты');
 const nav=document.createElement('nav');nav.className='corp-nav wrap';nav.setAttribute('aria-label','Основные разделы');
 nav.innerHTML=groups.map(g=>'<details><summary>'+g[0]+'</summary><div class="corp-mega"><div class="corp-menu-note"><strong>'+g[1]+'</strong><p>'+g[2]+'</p></div><div class="corp-menu-links">'+g[3].map(i=>link(i[0],i[1]+'<small>'+i[2]+'</small>')).join('')+'</div></div></details>').join('')+'<a class="corp-home" href="#home">Главная</a>';
