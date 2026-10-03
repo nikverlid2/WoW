@@ -97,15 +97,15 @@ render();
 
 async function start3D(){
 try{
- const {createServerScene}=await import('./server-scene.js?v=5');
- model=await createServerScene({host:$('server-scene'),getState:()=>({...state,cpuCores:option('cpu').cores,cpuW:option('cpu').w,driveTB:option('drive').tb,psuW:option('psu').w})});
- model.focus('cpu');$('server-loading').hidden=true;
+ const {createServerScene}=await import('./server-scene.js?v=6');
+ model=await createServerScene({host:$('server-scene'),getState:()=>({...state,cpuCores:option('cpu').cores,cpuW:option('cpu').w,driveTB:option('drive').tb,ramGB:option('memory').gb,psuW:option('psu').w})});
+ model.focus('cpu');$('inspect-part').value='cpu';$('server-loading').hidden=true;
  $('cover').onclick=()=>{const open=model.cover();$('cover').setAttribute('aria-pressed',open);$('cover').textContent=open?'Без крышки':'С крышкой';$('explode').setAttribute('aria-pressed','false');$('inspect').setAttribute('aria-pressed','false')};
  $('explode').onclick=()=>{const value=model.explode();$('explode').setAttribute('aria-pressed',value);$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки';$('inspect').setAttribute('aria-pressed','false')};
  for(const id of ['front','top','rear','reset-view'])$(id).onclick=()=>{model.setView(id);if(id==='reset-view')$('inspect').setAttribute('aria-pressed','false')};
  $('zoom-in').onclick=()=>model.zoom(-1);$('zoom-out').onclick=()=>model.zoom(1);
- $('inspect').onclick=()=>{const active=$('inspect').getAttribute('aria-pressed')!=='true';$('inspect').setAttribute('aria-pressed',model.detail(active));};
- $('inspect-part').onchange=e=>{model.focus(e.target.value);$('inspect').setAttribute('aria-pressed',model.detail(true));};
+ $('inspect').onclick=()=>{const active=$('inspect').getAttribute('aria-pressed')!=='true';$('inspect').setAttribute('aria-pressed',model.detail(active));if(active){$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки';}};
+ $('inspect-part').onchange=e=>{model.focus(e.target.value);$('inspect').setAttribute('aria-pressed',model.detail(true));$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки';};
  $('full-scene').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('visual-panel').requestFullscreen()}catch{$('server-status').textContent='Полноэкранный режим недоступен в этом браузере.'}};
 }catch(err){$('server-loading').innerHTML='Не удалось загрузить модель.<button class="tool" id="retry-3d">Повторить</button>';$('retry-3d').onclick=()=>location.reload();console.error(err)}
 }

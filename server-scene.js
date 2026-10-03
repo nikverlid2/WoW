@@ -1,4 +1,4 @@
-import {createSoftwareRenderer} from './server-renderer.js?v=5';
+import {createSoftwareRenderer} from './server-renderer.js?v=6';
 
 export async function createServerScene({host,getState,onPart,onReady}) {
  const T=await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js');
@@ -69,7 +69,9 @@ export async function createServerScene({host,getState,onPart,onReady}) {
    const drives=group('drive');box(drives,4.22,.75,.03,0,.4,1.56,m.pcb);box(drives,4.25,.025,1.5,0,.76,2.40);
    for(let i=0;i<8;i++){
      const x=-1.57+(i%4)*1.047,y=.19+Math.floor(i/4)*.31;const g=new T.Group();g.position.set(x,y,exploded?1.05:0);drives.add(g);item('drive',g);
-     box(g,1,.255,1.52,0,0,2.41,m.dark);box(g,.94,.018,1.40,0,-.10,2.43,m.edge);
+     box(g,1,.026,1.52,0,-.123,2.41,m.dark);box(g,.94,.018,1.40,0,-.10,2.43,m.edge);box(g,.90,.06,.025,0,-.06,1.69,m.steel);
+     for(const sx of [-.40,.40])for(const sz of [1.91,2.68])screw(g,sx,-.083,sz);
+     box(g,.28,.045,.035,.12,-.023,2.00,m.black);box(g,.22,.011,.009,.12,-.003,1.98,m.gold);
      for(const side of [-1,1])box(g,.025,.22,1.36,side*.475,.015,2.45);
      if(i<s.driveCount){roundBox(g,.70,.07,1.00,0,-.025,2.5,m.edge,.012);label(g,'SATA SSD / '+s.driveTB+' TB',.56,.28,0,.013,2.46);for(const dx of [-.3,.3])screw(g,dx,.02,2.12)}
      roundBox(g,.98,.27,.10,0,0,3.21,m.black,.014);
@@ -116,10 +118,15 @@ export async function createServerScene({host,getState,onPart,onReady}) {
        box(board,.057,.065,1.38,mx,.18,z,m.blue);box(board,.019,.011,1.28,mx,.218,z,m.dark);
        for(const end of [-1,1])roundBox(board,.065,.09,.075,mx,.224,z+end*.69,m.white,.006);
        if(i<s.cpuCount&&j<perCPU){
-         const g=new T.Group();g.position.y=lift*.8;memory.add(g);item('memory',g);box(g,.027,.30,1.33,mx,.355,z,m.pcb);
-         for(let pin=0;pin<28;pin++)for(const face of [-1,1])box(g,.002,.036,.026,mx+face*.014,.222,z-.59+pin*.043,m.gold);
-         for(let n=0;n<8;n++)for(const face of [-1,1])box(g,.022,.14,.10,mx+face*.022,.363,z-.54+n*.15,m.black);
-         box(g,.009,.1,.34,mx+.036,.39,z,m.white);
+         const g=new T.Group();g.position.y=lift*.8;memory.add(g);item('memory',g);// DDR5 DIMM envelope: 133.35 × 31.25 mm, keyed contact edge.
+         const shape=new T.Shape();shape.moveTo(-.66675,-.15625);shape.lineTo(.003,-.15625);shape.lineTo(.003,-.111);shape.lineTo(.025,-.111);shape.lineTo(.025,-.15625);shape.lineTo(.66675,-.15625);
+         shape.lineTo(.66675,-.055);shape.lineTo(.645,-.055);shape.lineTo(.645,-.022);shape.lineTo(.66675,-.022);shape.lineTo(.66675,.15625);shape.lineTo(-.66675,.15625);shape.lineTo(-.66675,-.022);shape.lineTo(-.645,-.022);shape.lineTo(-.645,-.055);shape.lineTo(-.66675,-.055);shape.closePath();
+         const geo=new T.ExtrudeGeometry(shape,{depth:.013,bevelEnabled:false,steps:1});geo.translate(0,0,-.0065);geo.rotateY(-Math.PI/2);const pcb=new T.Mesh(geo,m.pcb);pcb.position.set(mx,.355,z);g.add(pcb);
+         // Contact fingers share one geometry per side rather than hundreds of draw calls.
+         for(const face of [-1,1]){const a=[];for(let pin=0;pin<144;pin++){const cz=pin<72?-.629+pin*.00865:.035+(pin-72)*.00865;const x=mx+face*.007,y=.202,z0=z+cz-.00265,z1=z+cz+.00265;const q=[[x,y,z0],[x,y+.034,z0],[x,y+.034,z1],[x,y,z0],[x,y+.034,z1],[x,y,z1]];if(face<0)q.reverse();q.forEach(v=>a.push(...v))}const pads=new T.BufferGeometry();pads.setAttribute('position',new T.Float32BufferAttribute(a,3));pads.computeVertexNormals();g.add(new T.Mesh(pads,m.gold));}
+         for(let n=0;n<10;n++)for(const face of [-1,1]){const cz=z-.58+n*.128;box(g,.018,.116,.085,mx+face*.016,.371,cz,m.black);for(let j=0;j<2;j++)box(g,.004,.015,.017,mx+face*.010,.27+j*.022,cz+.043,m.white);}
+         for(const face of [-1,1]){box(g,.014,.043,.07,mx+face*.014,.465,z-.17,m.black);box(g,.014,.052,.064,mx+face*.014,.458,z+.22,m.dark);}
+         const sticker=label(g,s.ramGB+'GB DDR5 / ECC',.45,.092,mx+.027,.379,z,false);sticker.rotation.y=Math.PI/2;
        }
      }
    }
@@ -184,6 +191,6 @@ export async function createServerScene({host,getState,onPart,onReady}) {
  for(const evt of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(evt,e=>{pointers.delete(e.pointerId);pinch=0});
  canvas.addEventListener('wheel',e=>{e.preventDefault();distance=Math.max(2.2,Math.min(22,distance+e.deltaY*.009));requestDraw()},{passive:false});
  canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','='].includes(e.key))return;e.preventDefault();theta+=e.key==='ArrowLeft'?-.15:e.key==='ArrowRight'?.15:0;phi=Math.max(.12,Math.min(1.55,phi+(e.key==='ArrowUp'?-.12:e.key==='ArrowDown'?.12:0)));distance=Math.max(2.2,Math.min(22,distance+(e.key==='-'?.7:['+','='].includes(e.key)?-.7:0)));requestDraw()});
- const api={rebuild:build,focus(k){focused=k;highlight(k);if(detail){applyView();requestDraw()}},detail(value){detail=value&&!!focused;if(detail){coverOpen=true;theta=['memory','network'].includes(focused)?1.1:.38;phi=.92;}else distance=exploded?15:12.7;applyView();requestDraw();return detail},setView(view){if(view==='front'){theta=0;phi=1.52}else if(view==='top'){theta=0;phi=.12}else if(view==='rear'){theta=Math.PI;phi=1.27}else{theta=.38;phi=.92;distance=exploded?15:12.7;detail=false;applyView()}requestDraw()},cover(){coverOpen=!coverOpen;exploded=false;detail=false;distance=12.7;applyView();requestDraw();return coverOpen},explode(){exploded=!exploded;coverOpen=true;detail=false;distance=exploded?15:12.7;build();return exploded},zoom(n){distance=Math.max(2.2,Math.min(22,distance+n));requestDraw()},isSoftware:renderer.isSoftware};
+ const api={rebuild:build,focus(k){focused=k;highlight(k);if(detail){applyView();requestDraw()}},detail(value){detail=value&&!!focused;if(detail){coverOpen=true;theta=['memory','network'].includes(focused)?1.1:.38;phi=.92;}else distance=exploded?15:12.7;applyView();requestDraw();return detail},setView(view){if(view==='front'){theta=0;phi=1.52}else if(view==='top'){theta=0;phi=.12}else if(view==='rear'){theta=Math.PI;phi=1.27}else{theta=.38;phi=.92;distance=exploded?15:12.7;detail=false;applyView()}requestDraw()},cover(){coverOpen=!coverOpen;exploded=false;detail=false;distance=12.7;build();return coverOpen},explode(){exploded=!exploded;coverOpen=true;detail=false;distance=exploded?15:12.7;build();return exploded},zoom(n){distance=Math.max(2.2,Math.min(22,distance+n));requestDraw()},isSoftware:renderer.isSoftware};
  build();resize();onReady?.(api);return api;
 }
