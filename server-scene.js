@@ -73,7 +73,7 @@ export async function createServerScene({host,getState,onPart,onReady}) {
      for(const sx of [-.40,.40])for(const sz of [1.91,2.68])screw(g,sx,-.083,sz);
      box(g,.28,.045,.035,.12,-.023,2.00,m.black);box(g,.22,.011,.009,.12,-.003,1.98,m.gold);
      for(const side of [-1,1])box(g,.025,.22,1.36,side*.475,.015,2.45);
-     if(i<s.driveCount){roundBox(g,.70,.07,1.00,0,-.025,2.5,m.edge,.012);label(g,'SATA SSD / '+s.driveTB+' TB',.56,.28,0,.013,2.46);for(const dx of [-.3,.3])screw(g,dx,.02,2.12)}
+     if(i<s.driveCount){roundBox(g,.70,.07,1.00,0,-.025,2.5,m.edge,.012);label(g,'SATA SSD / '+s.driveTB+' TB',.56,.28,0,.024,2.46);for(const dx of [-.3,.3])screw(g,dx,.02,2.12)}
      roundBox(g,.98,.27,.10,0,0,3.21,m.black,.014);
      for(let row=0;row<3;row++)for(let col=0;col<14;col++)box(g,.026,.033,.005,-.43+col*.052,-.07+row*.06,3.263,m.steel);
      // Raised curved handle, a latch and status light, not a painted rectangle.
