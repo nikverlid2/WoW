@@ -18,7 +18,7 @@ const cards=(rows)=>'<div class="corp-cards">'+rows.map(r=>'<article class="corp
 const faq=(rows)=>'<div class="corp-faq">'+rows.map(r=>'<details><summary>'+r[0]+'</summary><p>'+r[1]+'</p></details>').join('')+'</div>';
 const notice=t=>'<div class="corp-status">'+t+'</div>';
 const pages={
-about:{label:'О компании',kicker:'Кламас / Уфа',title:'Технологии для жизни.<br>Техника для дела.',lead:'Кламас — компьютерная и цифровая техника для дома, учёбы, работы и бизнеса.',intro:'Хороший выбор начинается с задачи: учиться, работать с графикой, играть, подключить офис или оборудовать рабочее место. На сайте Кламас можно выбрать направление, сравнить технику и собрать конфигурацию компьютера.',cards:[
+about:{label:'О компании',kicker:'Кламас / Уфа',title:'Компьютеры.<br>Цифровая техника.<br><span class="corp-brand-word">Кламас.</span>',lead:'Кламас — компьютерная и цифровая техника для дома, учёбы, работы и бизнеса.',intro:'Хороший выбор начинается с задачи: учиться, работать с графикой, играть, подключить офис или оборудовать рабочее место. На сайте Кламас можно выбрать направление, сравнить технику и собрать конфигурацию компьютера.',cards:[
 ['Для себя','Ноутбуки, компьютеры, мониторы и аксессуары для повседневных задач.','#categories','Перейти к категориям'],
 ['Для команды','Корпоративные закупки с историей заказов, платежей, отгрузок и документов в B2B-кабинете.','business'],
 ['Для вашей задачи','Подбор начинается с программ, нагрузки, бюджета и требований к совместимости.','solutions']],
@@ -62,7 +62,7 @@ function route(){
  const hash=location.hash;const key=hash.startsWith('#/')?hash.slice(2):aliases[hash.slice(1)];
  const p=pages[key];home.hidden=!!p;page.hidden=!p;closeMenus();
  if(p){
- page.innerHTML='<div class="corp-crumbs"><a href="#home">Главная</a><span>/</span><span>'+p.label+'</span></div><section class="corp-hero"><div><span class="corp-eyebrow">'+(p.kicker||'Кламас / '+p.label)+'</span><h1 tabindex="-1">'+p.title+'</h1><p>'+p.lead+'</p></div><div class="corp-orbit" aria-hidden="true"><b>кламас</b></div></section>'+(p.intro?'<p class="corp-intro">'+p.intro+'</p>':'')+(p.cards?cards(p.cards):'')+(p.note?notice(p.note):'')+(p.faq?'<h2 class="corp-section-title">'+(p.heading||'Полезно знать')+'</h2>'+faq(p.faq):'')+(p.extra||'')+'<section class="corp-callout"><div><h2>Ваш кабинет компании</h2><p>Заказы, отгрузки, документы и связь с менеджером.</p></div><button class="primary" data-b2b>Войти в B2B-кабинет</button></section>';
+ page.innerHTML='<div class="corp-crumbs"><a href="#home">Главная</a><span>/</span><span>'+p.label+'</span></div><section class="corp-hero"><div><span class="corp-eyebrow">'+(p.kicker||'Кламас / '+p.label)+'</span><h1 tabindex="-1">'+p.title+'</h1><p>'+p.lead+'</p></div><div class="corp-hardware" aria-hidden="true"><div class="corp-hardware-grid"></div><img class="corp-hardware-pc" src="'+document.querySelector('.category-grid [data-category="Компьютеры"] img').src+'" alt=""><img class="corp-hardware-laptop" src="'+document.querySelector('.promo-work img').src+'" alt=""><span class="corp-hardware-caption">ДОМА · НА РАБОТЕ · В ИГРЕ</span></div></section>'+(p.intro?'<p class="corp-intro">'+p.intro+'</p>':'')+(p.cards?cards(p.cards):'')+(p.note?notice(p.note):'')+(p.faq?'<h2 class="corp-section-title">'+(p.heading||'Полезно знать')+'</h2>'+faq(p.faq):'')+(p.extra||'')+'<section class="corp-callout"><div><h2>Ваш кабинет компании</h2><p>Заказы, отгрузки, документы и связь с менеджером.</p></div><button class="primary" data-b2b>Войти в B2B-кабинет</button></section>';
  document.title=p.label+' — Кламас';page.querySelector('h1').focus({preventScroll:true});window.scrollTo(0,0);
  }else{
  document.title='Кламас — компьютерная и цифровая техника';
@@ -71,6 +71,15 @@ function route(){
  }
  nav.querySelectorAll('a').forEach(a=>{if(a.getAttribute('href')==='#/'+key)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
 }
+// Handle every logo click, including a repeated click on the same hash.
+document.addEventListener('click',e=>{
+ const logo=e.target.closest('header .logo,footer .logo');
+ if(!logo)return;
+ e.preventDefault();
+ if(location.hash!=='#/about')history.pushState(null,'','#/about');
+ route();
+},true);
+window.addEventListener('popstate',route);
 window.addEventListener('hashchange',route);
 document.querySelector('.catalog-link').addEventListener('click',()=>{location.hash='categories';route()});
 document.querySelector('#search').addEventListener('input',()=>{if(!page.hidden){location.hash='categories';route()}});
