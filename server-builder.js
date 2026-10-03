@@ -76,10 +76,41 @@ const lines=['КЛАМАС — КОНФИГУРАЦИЯ СЕРВЕРА','Дем�
 const url=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\n')],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='Klamas-server.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 render();
+
+function softwareRenderer(T){
+ const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');let width=1,height=1,ratio=1;
+ return {domElement:canvas,shadowMap:{},setPixelRatio:r=>ratio=Math.min(r,1.5),setSize(w,h){width=w;height=h;canvas.width=w*ratio;canvas.height=h*ratio;canvas.style.width=w+'px';canvas.style.height=h+'px'},render(scene,camera){
+ ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,width,height);
+ const shade=ctx.createRadialGradient(width*.5,height*.64,10,width*.5,height*.64,width*.43);shade.addColorStop(0,'rgba(25,43,54,.16)');shade.addColorStop(1,'rgba(25,43,54,0)');ctx.fillStyle=shade;ctx.save();ctx.translate(0,height*.28);ctx.scale(1,.6);ctx.fillRect(0,0,width,height);ctx.restore();
+ scene.updateMatrixWorld(true);camera.updateMatrixWorld(true);
+ const triangles=[],light=new T.Vector3(-.4,.85,.55).normalize(),v0=new T.Vector3(),v1=new T.Vector3(),v2=new T.Vector3(),edge=new T.Vector3(),normal=new T.Vector3(),view=new T.Vector3();
+ scene.traverse(o=>{
+ if(!o.isMesh||!o.visible||o.material.isShadowMaterial)return;
+ for(let p=o.parent;p;p=p.parent)if(!p.visible)return;
+ const geometry=o.geometry,position=geometry.attributes.position,index=geometry.index,material=o.material;
+ if(!position||Array.isArray(material))return;
+ const color=material.color.clone().convertLinearToSRGB(),world=[],projected=[];
+ for(let i=0;i<position.count;i++){const v=new T.Vector3().fromBufferAttribute(position,i).applyMatrix4(o.matrixWorld);world.push(v);const p=v.clone().project(camera);projected.push([(.5+p.x*.5)*width,(.5-p.y*.5)*height,p.z])}
+ const count=index?index.count:position.count;
+ for(let i=0;i<count;i+=3){
+ const a=index?index.getX(i):i,b=index?index.getX(i+1):i+1,c=index?index.getX(i+2):i+2;
+ v0.copy(world[a]);v1.copy(world[b]);v2.copy(world[c]);normal.subVectors(v1,v0).cross(edge.subVectors(v2,v0)).normalize();view.subVectors(camera.position,v0);
+ if(normal.dot(view)<=0)continue;
+ const A=projected[a],B=projected[b],C=projected[c];if(A[2]>1||B[2]>1||C[2]>1||A[2]<-1)continue;
+ const luminance=material.isMeshBasicMaterial?1:Math.min(1.15,.55+.55*Math.max(0,normal.dot(light)));
+ const rgb=[color.r,color.g,color.b].map(x=>Math.min(255,Math.round(x*luminance*255)));
+ triangles.push({A,B,C,z:(A[2]+B[2]+C[2])/3,color:'rgb('+rgb.join(',')+')'});
+ }
+ });
+ triangles.sort((a,b)=>b.z-a.z);
+ for(const t of triangles){ctx.beginPath();ctx.moveTo(t.A[0],t.A[1]);ctx.lineTo(t.B[0],t.B[1]);ctx.lineTo(t.C[0],t.C[1]);ctx.closePath();ctx.fillStyle=t.color;ctx.fill()}
+ }};
+}
+
 async function start3D(){
 try{
 const T=await import('https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js');
-const host=$('server-scene'),renderer=new T.WebGLRenderer({antialias:true,alpha:true});
+const host=$('server-scene');let renderer;try{renderer=new T.WebGLRenderer({antialias:true,alpha:true})}catch{renderer=softwareRenderer(T)}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1.25;
 host.prepend(renderer.domElement);renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','3D-сервер: вращение стрелками, масштаб клавишами плюс и минус');
 const scene=new T.Scene(),camera=new T.PerspectiveCamera(38,1,.1,100);
