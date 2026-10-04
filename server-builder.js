@@ -1,30 +1,9 @@
-
 (()=>{
 'use strict';
-const $=id=>document.getElementById(id),money=n=>new Intl.NumberFormat('ru-RU').format(n)+' ₽';
-const icons={
- platform:'<rect x="5" y="10" width="54" height="38" rx="4"/><path d="M10 18h42M10 27h42M10 37h30"/><circle cx="50" cy="39" r="2"/>',
- cpu:'<rect x="14" y="14" width="36" height="36" rx="3"/><rect x="22" y="22" width="20" height="20"/><path d="M20 6v8m12-8v8m12-8v8M20 50v8m12-8v8m12-8v8M6 20h8M6 32h8M6 44h8m36-24h8m-8 12h8m-8 12h8"/>',
- memory:'<path d="M5 21h54v23H5zM9 44v6m7-6v6m7-6v6m7-6v6m7-6v6m7-6v6m7-6v6"/><path d="M11 27h8v11h-8zm16 0h8v11h-8zm16 0h8v11h-8z"/>',
- drive:'<rect x="13" y="7" width="38" height="49" rx="4"/><circle cx="32" cy="29" r="12"/><path d="m32 29 12 16M20 50h17"/>',
- raid:'<rect x="9" y="8" width="46" height="14" rx="3"/><rect x="9" y="26" width="46" height="14" rx="3"/><rect x="9" y="44" width="46" height="14" rx="3"/><path d="M16 15h26M16 33h26M16 51h26"/>',
- network:'<rect x="7" y="15" width="48" height="28" rx="2"/><path d="M13 21h13v14H13zm25 0h13v14H38zM10 49h41M6 8v45"/>',
- psu:'<path d="M9 9h40l7 8v35H9z"/><circle cx="31" cy="29" r="14"/><circle cx="31" cy="29" r="5"/><path d="M31 15v9m0 10v9M17 29h9m10 0h9"/>'
-};
-function icon(k){return '<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">'+icons[k]+'</svg>'}
-const parts={
- platform:{label:'Платформа',options:[{name:'Rack 2U · 8 отсеков LFF',desc:'437 × 647 × 89 мм · 16 DIMM · 3 вентилятора 80 мм',price:65000}]},
- cpu:{label:'Процессоры',options:[{name:'16 ядер / 32 потока',desc:'Серверный CPU · 180 Вт',cores:16,w:180,price:95000},{name:'32 ядра / 64 потока',desc:'Серверный CPU · 240 Вт',cores:32,w:240,price:175000},{name:'48 ядер / 96 потоков',desc:'Серверный CPU · 300 Вт',cores:48,w:300,price:295000}]},
- memory:{label:'Оперативная память',options:[{name:'32 ГБ DDR5 ECC RDIMM',desc:'Один модуль · коррекция ошибок',gb:32,price:16000},{name:'64 ГБ DDR5 ECC RDIMM',desc:'Один модуль · коррекция ошибок',gb:64,price:31000},{name:'128 ГБ DDR5 ECC RDIMM',desc:'Один модуль · коррекция ошибок',gb:128,price:67000}]},
- drive:{label:'Накопители',options:[{name:'SSD 960 ГБ SATA',desc:'2.5″ в адаптере 3.5″ · модельный ресурс 1 DWPD',tb:.96,w:7,price:18000},{name:'SSD 1.92 ТБ SATA',desc:'2.5″ в адаптере 3.5″ · модельный ресурс 1 DWPD',tb:1.92,w:9,price:34000},{name:'SSD 3.84 ТБ SATA',desc:'2.5″ в адаптере 3.5″ · модельный ресурс 1 DWPD',tb:3.84,w:11,price:65000}]},
- raid:{label:'Дисковый массив',options:[{name:'RAID 0',desc:'Объединение ёмкости · без отказоустойчивости',level:0,min:2,price:0},{name:'RAID 1',desc:'Зеркало из двух дисков',level:1,min:2,price:18000},{name:'RAID 5',desc:'Один диск используется под избыточность',level:5,min:3,price:24000},{name:'RAID 6',desc:'Два диска используются под избыточность',level:6,min:4,price:29000},{name:'RAID 10',desc:'Чередование и зеркала · чётное число дисков',level:10,min:4,price:29000}]},
- network:{label:'Сетевой адаптер',options:[{name:'2 × 1 GbE',desc:'Два медных порта RJ45',speed:1,w:6,price:6000},{name:'2 × 10 GbE',desc:'Два порта SFP+ · модули отдельно',speed:10,w:15,price:24000},{name:'2 × 25 GbE',desc:'Два порта SFP28 · модули отдельно',speed:25,w:22,price:48000}]},
- psu:{label:'Блоки питания',options:[{name:'2 × 800 Вт',desc:'Резервирование 1+1 · доступно 800 Вт при отказе',w:800,price:38000},{name:'2 × 1200 Вт',desc:'Резервирование 1+1 · доступно 1200 Вт при отказе',w:1200,price:56000},{name:'2 × 1600 Вт',desc:'Резервирование 1+1 · доступно 1600 Вт при отказе',w:1600,price:79000}]}
-};
-
-const partHints={platform:'Корпус с материнской платой, охлаждением и восемью фронтальными отсеками. Компоновка основана на сервере Supermicro 2U.',cpu:'Два сокета. В двухпроцессорной сборке устанавливаются одинаковые CPU. Радиаторы входят в модельную платформу.',memory:'16 слотов DDR5 ECC RDIMM: по 8 на процессор. Модули на модели распределяются между установленными CPU.',drive:'SSD 2.5″ устанавливаются в адаптеры фронтальных корзин 3.5″. Все диски массива одинаковой ёмкости.',raid:'Полезная ёмкость зависит от RAID. Проверка учитывает минимум дисков и чётность для RAID 10.',network:'Двухпортовый адаптер в слоте PCIe. Для SFP+ и SFP28 трансиверы согласовываются отдельно.',psu:'Два сменных модуля. При резервировании 1+1 всю нагрузку должен выдерживать один блок питания.'};
-function specTags(k,o){const tags=k==='cpu'?[o.cores+' ядер',o.w+' Вт','2 сокета']:k==='memory'?[o.gb+' ГБ','DDR5','ECC RDIMM']:k==='drive'?[o.tb+' ТБ','SATA','2.5″ + адаптер']:k==='psu'?[o.w+' Вт','2 модуля','Резерв 1+1']:k==='network'?[o.speed+' Гбит/с','2 порта','PCIe']:k==='platform'?['2U','16 DIMM','8 LFF']:['От '+o.min+' дисков','RAID '+o.level];return '<span class="spec-tags">'+tags.map(t=>'<span>'+t+'</span>').join('')+'</span>'}
-function thumb(k){
+const $=id=>document.getElementById(id),C=window.ServerCatalog,{parts}=C,esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function thumb(k,o){
+if(o?.image)return '<img class="part-thumb" src="'+o.image+'" alt="'+esc(o.name)+'" loading="lazy" referrerpolicy="no-referrer">';
+if(k==='controller')k='raid';
 const gradient='<defs><linearGradient id="metal-'+k+'" x2="1" y2="1"><stop stop-color="#f1f2f1"/><stop offset=".45" stop-color="#b8c0c4"/><stop offset="1" stop-color="#e0e4e4"/></linearGradient></defs>';
 const metal='url(#metal-'+k+')';let drawing='';
 if(k==='cpu')drawing='<path fill="#294e46" d="M28 12h57l8 12v58l-9 8H24L16 78V23z"/><path fill="'+metal+'" stroke="#899393" d="M30 18h48l8 12v47l-8 6H30l-8-9V29z"/><path fill="#eef0e9" d="M30 29h46v40H30z"/><text x="53" y="48" text-anchor="middle" font-size="10" fill="#53605b">SERVER</text><text x="53" y="61" text-anchor="middle" font-size="8" fill="#53605b">PROCESSOR</text>';
@@ -35,79 +14,75 @@ else if(k==='network'||k==='raid')drawing='<path fill="#31654a" d="M13 32h79v39H
 else drawing='<path fill="#d0d5d7" d="m10 50 32-27 59 13-35 30z"/><path fill="#a3aeb2" d="m66 66 35-30v19L66 85z"/><path fill="#29343a" d="m10 50 56 16v19L10 69z"/>'+Array.from({length:4},(_,i)=>'<path stroke="#728088" stroke-width="2" d="m'+(14+i*13)+' '+(56+i*3.7)+' 9 2.6m-9 3 9 2.6"/>').join('');
 return '<svg class="part-thumb" viewBox="0 0 108 100" aria-hidden="true">'+gradient+drawing+'</svg>';
 }
-
-const defaults={platform:0,cpu:0,memory:0,drive:1,raid:1,network:0,psu:0,cpuCount:1,ramCount:4,driveCount:2};
-let state={...defaults},selectedKey=null,model=null;
-try{const saved=JSON.parse(localStorage.getItem('klamas-server-v1'));if(saved&&typeof saved==='object'){for(const k of Object.keys(parts))if(Number.isInteger(saved[k])&&parts[k].options[saved[k]])state[k]=saved[k];for(const [k,allowed] of [['cpuCount',[1,2]],['ramCount',[2,4,6,8,12,16]],['driveCount',[2,3,4,5,6,7,8]]])if(allowed.includes(saved[k]))state[k]=saved[k]}}catch{}
-const option=k=>parts[k].options[state[k]],qty=k=>k==='cpu'?state.cpuCount:k==='memory'?state.ramCount:k==='drive'?state.driveCount:1;
-function calculate(){
-const cpu=option('cpu'),ram=option('memory'),drive=option('drive'),raid=option('raid'),n=state.driveCount;
-const issues=[];
-if(n<raid.min)issues.push(raid.name+': нужно минимум '+raid.min+' диска.');
-if(raid.level===1&&n!==2)issues.push('RAID 1 в этой платформе использует ровно 2 диска.');
-if(raid.level===10&&n%2)issues.push('Для RAID 10 нужно чётное число дисков.');
-if(state.ramCount<state.cpuCount*2)issues.push('Установите минимум 2 модуля памяти на каждый процессор.');
-if(state.ramCount>state.cpuCount*8)issues.push('На каждый процессор доступно 8 слотов DIMM. Добавьте второй CPU или уменьшите число модулей.');
-const load=cpu.w*state.cpuCount+state.ramCount*12+drive.w*n+option('network').w+110;
-const recommended=Math.ceil(load*1.25/10)*10;
-if(recommended>option('psu').w)issues.push('Для резерва 1+1 выберите блоки питания не менее '+recommended+' Вт каждый.');
-const diskValid=n>=raid.min&&!(raid.level===1&&n!==2)&&!(raid.level===10&&n%2);
-const usable=diskValid?drive.tb*(raid.level===0?n:raid.level===1?1:raid.level===5?n-1:raid.level===6?n-2:n/2):null;
-const total=Object.keys(parts).reduce((s,k)=>s+option(k).price*qty(k),0);
-return {issues,load,recommended,usable,total,cores:cpu.cores*state.cpuCount,ram:ram.gb*state.ramCount};
-}
+let state=C.blank(),model=null,selectedKey='cpu',lastState=null;
+try{state=C.sanitize(JSON.parse(localStorage.getItem('klamas-server-v2')))}catch{}
+try{if(location.hash.startsWith('#build='))state=C.sanitize(JSON.parse(decodeURIComponent(location.hash.slice(7))))}catch{}
+const option=k=>C.get(state,k),qty=k=>!option(k)?0:k==='cpu'?state.cpuCount:k==='memory'?state.ramCount:k==='drive'?state.driveCount:1;
+const sceneKey=k=>k==='controller'?'raid':k;
+const hints={platform:'Одна проверяемая платформа. Материнская плата, корпус, охлаждение, два блока питания и встроенная сеть входят в её состав.',cpu:'Оба сокета LGA4677 используют одинаковую модель CPU. При двух процессорах модули памяти распределяются между ними поровну.',memory:'Эти артикулы указаны в подборщике Kingston для SYS-621P-TRT. Реальная частота ограничивается выбранным Xeon.',drive:'Один массив из одинаковых накопителей. SATA SSD 2.5″ автоматически добавляет нужные корзины-переходники; HDD 3.5″ устанавливается напрямую.',controller:'Контроллер — физическое устройство. Уровень RAID выбирается отдельно после накопителей; RAID 6 требует дополнительной платы.',network:'Встроенные два порта 10GbE есть в любой сборке. Плата 25GbE добавляет ещё два порта SFP28.',psu:'Модель блока питания определяется платформой: два PWS-1K23A-1R, резервирование 1+1.'};
+function tags(o){return '<div class="spec-tags">'+o.tags.map(t=>'<span>'+esc(t)+'</span>').join('')+'</div>'}
+function status(t){$('server-status').textContent=t}
+function selectedInfo(k){const o=option(k);if(!o)return '<strong>Выберите компонент</strong><span>Пока не установлен</span>';return '<strong>'+esc(o.name)+(qty(k)>1?' × '+qty(k):'')+'</strong><code>'+esc(o.id)+'</code>'}
 function render(){
-const c=calculate();
-$('server-components').innerHTML=Object.keys(parts).map(k=>'<button class="row" data-part="'+k+'">'+thumb(k)+'<span><small>'+parts[k].label+'</small><strong>'+option(k).name+(qty(k)>1?' × '+qty(k):'')+'</strong></span><span class="cost">'+money(option(k).price*qty(k))+'<span>Выбрать →</span></span></button>').join('');
-$('server-total').textContent=money(c.total);$('build-count').textContent=state.cpuCount+' CPU · '+state.ramCount+' DIMM · '+state.driveCount+' SSD';$('slot-map').innerHTML=Array.from({length:8},(_,i)=>'<span class="'+(i<state.driveCount?'occupied':'')+'" title="Отсек '+(i+1)+(i<state.driveCount?': SSD':': свободен')+'">'+(i+1)+'</span>').join('');
-$('server-specs').innerHTML=[['Ядер',c.cores],['Память',c.ram+' ГБ'],['Полезная ёмкость',c.usable===null?'—':c.usable.toLocaleString('ru-RU')+' ТБ'],['Нагрузка, оценка',c.load+' Вт']].map(x=>'<div><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
-$('server-checks').className='checks'+(c.issues.length?' bad':'');
-$('server-checks').innerHTML='<b>'+(c.issues.length?'Требует изменений':'Совместимо в рамках модельной платформы')+'</b>'+c.issues.map(x=>'<p>• '+x+'</p>').join('')+'<p>Питание 1+1: рекомендуем от '+c.recommended+' Вт на каждый БП.</p>'+(option('raid').level===0?'<p>RAID 0 не защищает данные при отказе диска.</p>':'<p>RAID не заменяет резервное копирование.</p>');
-$('save-server').disabled=!!c.issues.length;$('download-server').disabled=!!c.issues.length;
-if(model)model.rebuild();
+ const c=C.validate(state);
+ $('server-components').innerHTML=Object.keys(parts).map((k,i)=>{const o=option(k);return '<article class="component-row '+(!o?'empty':'')+'"><button class="row" data-part="'+k+'"><span class="row-visual">'+(o?thumb(k,o):'<span class="add-part">+</span>')+'</span><span><small>'+String(i+1).padStart(2,'0')+' / '+parts[k].label+'</small>'+selectedInfo(k)+'</span><span class="row-action">'+(parts[k].fixed?'Состав ↗':o?'Заменить':'Выбрать →')+'</span></button>'+(o&&!parts[k].fixed?'<div class="row-controls"><span>'+esc(o.included?'В составе платформы':o.tags.slice(0,2).join(' · '))+'</span><button data-preview="'+k+'" '+(o.included?'disabled':'')+'>В 3D ↗</button>'+(parts[k].required?'<button data-remove="'+k+'" aria-label="Убрать '+parts[k].label+'">×</button>':'')+'</div>':'')+'</article>'}).join('');
+ $('build-progress').innerHTML='<span>'+c.filled+' из 3 обязательных разделов</span><progress max="3" value="'+c.filled+'"></progress>';
+ $('build-count').textContent=(option('cpu')?state.cpuCount:0)+' CPU · '+(option('memory')?state.ramCount:0)+' DIMM · '+(option('drive')?state.driveCount:0)+' дисков';
+ $('slot-map').innerHTML=Array.from({length:8},(_,i)=>'<span class="'+(option('drive')&&i<state.driveCount?'occupied':'')+'" title="Отсек '+(i+1)+'">'+(i+1)+'</span>').join('');
+ $('server-specs').innerHTML=[['Ядер / потоков',c.cores+' / '+c.threads],['Память',c.ram+' ГБ'],['Ёмкость массива',c.usable===null?'—':c.usable.toLocaleString('ru-RU')+' ТБ'],['Память, до',c.mt?c.mt+' MT/s':'—']].map(x=>'<div><small>'+x[0]+'</small><b>'+x[1]+'</b></div>').join('');
+ $('server-checks').className='checks'+(c.issues.length?' bad':'');$('server-checks').innerHTML='<b>'+(c.issues.length?'Сборка требует изменений':'Основные параметры согласованы')+'</b>'+c.issues.map(x=>'<p>'+esc(x)+'</p>').join('')+'<p>Расчётная нагрузка: '+c.load+' Вт. В резерве 1+1 доступно 1200 Вт.</p>';
+ $('compat-notes').innerHTML=c.notes.map(x=>'<li>'+esc(x)+'</li>').join('');
+ $('accessories').innerHTML=c.accessories.length?c.accessories.map(x=>'<div><span>'+esc(x.name)+'<code>'+x.id+'</code></span><b>× '+x.qty+'</b></div>').join(''):'<p>Здесь появятся держатели CPU и переходники для выбранных деталей.</p>';
+ $('server-total').textContent='Цена по запросу';$('download-server').disabled=!!c.issues.length;
+ const ctrl=option('controller');$('raid-level').innerHTML=['none',0,1,5,6,10].map(r=>{const why=!ctrl.levels.includes(r)?'нужна RAID-плата':option('drive')&&((r===1&&state.driveCount!==2)||(r===10&&(state.driveCount<4||state.driveCount%2))||(r===5&&state.driveCount<3)||(r===6&&state.driveCount<4)||(r===0&&state.driveCount<2))?'не подходит число дисков':'';return '<option value="'+r+'" '+(r===state.raid?'selected':'')+' '+(why?'disabled':'')+'>'+(r==='none'?'Без RAID · отдельные диски':'RAID '+r)+(why?' — '+why:'')+'</option>'}).join('');
+ $('raid-note').textContent=state.raid==='none'?'Показана суммарная ёмкость отдельных дисков.':state.raid===0?'Максимальная ёмкость; отказ одного диска разрушает массив.':'Полезная ёмкость указана до форматирования. RAID не заменяет резервную копию.';
+ if(model){model.rebuild();refreshInspect()}
+}
+function counts(k){return k==='cpu'?['cpuCount',[1,2],'Процессоров']:k==='memory'?['ramCount',state.cpuCount===1?[1,2,4,6,8]:[2,4,8,12,16],'Модулей']:k==='drive'?['driveCount',[1,2,3,4,5,6,7,8],'Накопителей']:null}
+function choices(){
+ const query=$('part-search').value.trim().toLowerCase(),brand=$('part-brand').value,type=$('part-type').value;
+ let list=parts[selectedKey].options.map((o,i)=>({o,i})).filter(({o})=>(!query||(o.name+' '+o.id+' '+o.desc).toLowerCase().includes(query))&&(!brand||o.brand===brand)&&(!type||o.kind===type));
+ $('picker-count').textContent=list.length+' позиций';
+ $('server-choices').innerHTML=list.map(({o,i})=>'<article class="choice '+(state[selectedKey]===i?'selected':'')+'">'+thumb(selectedKey,o)+'<div class="choice-text"><span class="maker">'+o.brand+'</span><h3>'+esc(o.name)+'</h3><code>'+esc(o.id)+'</code><p>'+esc(o.desc)+'</p>'+tags(o)+'<a class="source-link" href="'+o.source+'" target="_blank" rel="noopener">Документация производителя ↗</a>'+(o.evidence?'<p class="evidence">'+esc(o.evidence)+'</p>':'')+'</div><div class="choice-price"><span>'+(o.included?'В составе платформы':'Цена по запросу')+'</span><button class="select-choice" data-choice="'+i+'">'+(state[selectedKey]===i?'Выбрано ✓':'Установить')+'</button>'+(!o.included?'<button class="preview-choice" data-see="'+i+'">Рассмотреть в 3D</button>':'')+'</div></article>').join('')||'<p class="no-results">Ничего не найдено. Измените запрос или фильтры.</p>';
 }
 function picker(k){
-selectedKey=k;if(model){model.focus(k);if(k!=='platform'&&k!=='raid')$('inspect-part').value=k;}
-$('picker-title').textContent=parts[k].label;$('picker-count').textContent=parts[k].options.length+' варианта';$('picker-context').textContent=partHints[k];
-$('server-choices').innerHTML=parts[k].options.map((o,i)=>'<button class="choice '+(state[k]===i?'selected':'')+'" data-choice="'+i+'" aria-pressed="'+(state[k]===i)+'">'+thumb(k)+'<span class="choice-text"><h3>'+o.name+'</h3><p>'+o.desc+'</p>'+specTags(k,o)+'</span><span class="choice-price"><b>'+money(o.price)+'</b><em>'+(state[k]===i?'Выбрано ✓':'Выбрать')+'</em></span></button>').join('');
-const counts=k==='cpu'?['cpuCount',[1,2],'Количество процессоров']:k==='memory'?['ramCount',[2,4,6,8,12,16],'Количество модулей']:k==='drive'?['driveCount',[2,3,4,5,6,7,8],'Количество дисков']:null;
-$('server-quantity').innerHTML=counts?'<label class="field">'+counts[2]+'<select id="part-count" data-count="'+counts[0]+'">'+counts[1].map(n=>'<option '+(state[counts[0]]===n?'selected':'')+'>'+n+'</option>').join('')+'</select></label>':'';
-if(!$('server-picker').open)$('server-picker').showModal();
+ selectedKey=k;if(model)model.focus(sceneKey(k));$('picker-title').textContent=parts[k].label;$('picker-context').textContent=hints[k];$('part-search').value='';
+ $('part-brand').innerHTML='<option value="">Все производители</option>'+[...new Set(parts[k].options.map(x=>x.brand))].map(x=>'<option>'+x+'</option>').join('');$('part-type').hidden=k!=='drive';$('part-type').value='';
+ const ct=counts(k);$('server-quantity').innerHTML=ct?'<label class="field">'+ct[2]+'<select id="part-count" data-count="'+ct[0]+'">'+ct[1].map(n=>'<option '+(state[ct[0]]===n?'selected':'')+'>'+n+'</option>').join('')+'</select><span>'+(k==='cpu'?'Одинаковая модель в обоих сокетах':k==='memory'?'Равномерно между установленными CPU':'Один массив из одинаковых моделей')+'</span></label>':'';
+ choices();if(!$('server-picker').open)$('server-picker').showModal();
 }
-document.addEventListener('click',e=>{
-const b=e.target.closest('button');if(!b)return;
-if(b.dataset.part)picker(b.dataset.part);
-if(b.dataset.choice!==undefined){state[selectedKey]=+b.dataset.choice;render();picker(selectedKey)}
-if(b.dataset.preset){
-document.querySelectorAll('[data-preset]').forEach(n=>n.setAttribute('aria-pressed',n===b));
-state={...defaults,...(b.dataset.preset==='vm'?{cpu:1,cpuCount:2,memory:1,ramCount:8,driveCount:4,raid:4,network:1,psu:1}:b.dataset.preset==='storage'?{drive:2,driveCount:8,raid:3,network:1}:{} )};
-render();$('server-status').textContent='Конфигурация изменена. Нажмите «Сохранить», чтобы запомнить её.';
-}
+function change(fn,message){lastState={...state};fn();document.querySelectorAll('[data-preset]').forEach(n=>n.setAttribute('aria-pressed','false'));render();status(message);$('undo-change').hidden=false;}
+function install(i){change(()=>{state[selectedKey]=i;if(selectedKey==='cpu'){const allowed=counts('memory')[1];if(!allowed.includes(state.ramCount))state.ramCount=allowed.find(x=>x>=state.ramCount)||allowed.at(-1)}},'Установлен '+parts[selectedKey].options[i].name+'.');choices();}
+function refreshInspect(){const k=$('inspect-part').value,key=k==='raid'?'controller':k,o=parts[key]?option(key):null;$('inspected-product').innerHTML=o?'<span>'+esc(o.name)+'</span><code>'+esc(o.id)+'</code><a href="'+o.source+'" target="_blank" rel="noopener">Характеристики ↗</a>':'<span>'+(key==='board'?'Supermicro X13DEI-T':key==='cooling'?'Охлаждение платформы':'Деталь не установлена')+'</span>'}
+function inspect(k){const key=sceneKey(k);$('inspect-part').value=key;if(model){model.focus(key);$('inspect').setAttribute('aria-pressed',model.detail(true));$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки'}refreshInspect();$('visual-panel').scrollIntoView({behavior:'smooth',block:'start'})}
+$('part-search').oninput=choices;$('part-brand').onchange=choices;$('part-type').onchange=choices;
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.part)picker(b.dataset.part);
+ if(b.dataset.choice!==undefined)install(+b.dataset.choice);
+ if(b.dataset.see!==undefined){install(+b.dataset.see);$('server-picker').close();inspect(selectedKey)}
+ if(b.dataset.preview)inspect(b.dataset.preview);
+ if(b.dataset.remove)change(()=>state[b.dataset.remove]=null,'Компонент убран из сборки.');
+ if(b.dataset.preset){change(()=>{state=b.dataset.preset==='empty'?C.blank():{...C.defaults(),...(b.dataset.preset==='vm'?{cpu:1,cpuCount:2,memory:2,ramCount:16,driveCount:4,controller:1,network:1,raid:10}:b.dataset.preset==='storage'?{drive:3,driveCount:8,controller:1,raid:6}:{})}},b.dataset.preset==='empty'?'Платформа готова. Выберите процессор, память и накопители.':'Готовая конфигурация загружена.');b.setAttribute('aria-pressed','true')}
 });
-$('server-quantity').addEventListener('change',e=>{if(e.target.dataset.count){state[e.target.dataset.count]=+e.target.value;render()}});
+$('server-quantity').addEventListener('change',e=>{const k=e.target.dataset.count;if(!k)return;change(()=>{state[k]=+e.target.value;if(k==='cpuCount'){const allowed=counts('memory')[1];if(!allowed.includes(state.ramCount))state.ramCount=allowed.find(x=>x>=state.ramCount)||allowed.at(-1)}},'Количество изменено. Проверки совместимости обновлены.');});
+$('raid-level').onchange=e=>change(()=>state.raid=e.target.value==='none'?'none':+e.target.value,'Уровень RAID изменён.');
+$('undo-change').onclick=()=>{if(lastState){const previous={...state};state=lastState;lastState=previous;render();status('Последнее изменение отменено.')}};
 $('picker-close').onclick=()=>$('server-picker').close();
-$('server-picker').addEventListener('click',e=>{if(e.target===$('server-picker')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close()}});
-$('save-server').onclick=()=>{try{localStorage.setItem('klamas-server-v1',JSON.stringify(state));$('server-status').textContent='Сборка сохранена на этом устройстве.'}catch{$('server-status').textContent='Браузер не разрешил сохранение. Скачайте спецификацию.'}};
-$('download-server').onclick=()=>{
-const c=calculate();if(c.issues.length)return;
-const lines=['КЛАМАС — КОНФИГУРАЦИЯ СЕРВЕРА','Демонстрационные компоненты и цены. Не счёт и не предложение поставки.','',...Object.keys(parts).map(k=>parts[k].label+': '+option(k).name+' × '+qty(k)+' — '+money(option(k).price*qty(k))),'','Ядер: '+c.cores,'ОЗУ: '+c.ram+' ГБ','Полезная ёмкость: '+c.usable+' ТБ (до форматирования)','Расчётная нагрузка: '+c.load+' Вт','Рекомендуемая мощность каждого БП: '+c.recommended+' Вт','Итого: '+money(c.total),'','Для заказа согласуйте точные артикулы, совместимость и стоимость с менеджером.'];
-const url=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\n')],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='Klamas-server.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
-};
+$('save-server').onclick=()=>{try{localStorage.setItem('klamas-server-v2',JSON.stringify(state));status('Сборка сохранена на этом устройстве.')}catch{status('Сохранение недоступно. Используйте ссылку на сборку.')}};
+$('share-server').onclick=async()=>{const url=new URL(location.href);url.hash='build='+encodeURIComponent(JSON.stringify(state));try{await navigator.clipboard.writeText(url.href);status('Ссылка на эту комплектацию скопирована.')}catch{$('share-url').hidden=false;$('share-url').value=url.href;$('share-url').select();status('Скопируйте ссылку из поля.')}};
+$('download-server').onclick=()=>{const c=C.validate(state);if(c.issues.length)return;const lines=['КЛАМАС — СПЕЦИФИКАЦИЯ СЕРВЕРА',...Object.keys(parts).filter(k=>option(k)).map(k=>parts[k].label+': '+option(k).name+' | '+option(k).id+' | '+qty(k)+' шт.'),'',...c.accessories.map(a=>a.name+' | '+a.id+' | '+a.qty+' шт.'),'','RAID: '+state.raid,'Ядра / потоки: '+c.cores+' / '+c.threads,'Память: '+c.ram+' ГБ, до '+c.mt+' MT/s','Полезная ёмкость: '+c.usable+' ТБ','Оценка нагрузки: '+c.load+' Вт','',...c.notes,'','Цена и наличие: по запросу. Нужны подтверждение QVL накопителей, кабельного комплекта, BIOS и стоимости поставки.','','Источники:',...Object.keys(parts).filter(k=>option(k)).map(k=>option(k).id+': '+option(k).source)];const url=URL.createObjectURL(new Blob(['\ufeff'+lines.join('\n')],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='Klamas-SYS-621P-TRT.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 render();
-
-async function start3D(){
-try{
- const {createServerScene}=await import('./server-scene.js?v=7');
- model=await createServerScene({host:$('server-scene'),getState:()=>({...state,cpuCores:option('cpu').cores,cpuW:option('cpu').w,driveTB:option('drive').tb,ramGB:option('memory').gb,psuW:option('psu').w})});
- model.focus('cpu');$('inspect-part').value='cpu';$('server-loading').hidden=true;
+(async()=>{try{
+ const {createServerScene}=await import('./server-scene.js?v=8');
+ model=await createServerScene({host:$('server-scene'),getState:()=>({...state,cpuCount:option('cpu')?state.cpuCount:0,ramCount:option('memory')?state.ramCount:0,driveCount:option('drive')?state.driveCount:0,cpuCores:option('cpu')?.cores||0,cpuW:option('cpu')?.w||0,cpuName:option('cpu')?.id||'',driveTB:option('drive')?.tb||0,driveKind:option('drive')?.kind||'SSD',driveName:option('drive')?.id||'',ramGB:option('memory')?.gb||0,ramChips:option('memory')?.chips||0,ramName:option('memory')?.id||'',psuW:1200,networkName:option('network').id,controllerName:option('controller').id})});
+ model.focus('cpu');$('server-loading').hidden=true;refreshInspect();
  $('cover').onclick=()=>{const open=model.cover();$('cover').setAttribute('aria-pressed',open);$('cover').textContent=open?'Без крышки':'С крышкой';$('explode').setAttribute('aria-pressed','false');$('inspect').setAttribute('aria-pressed','false')};
- $('explode').onclick=()=>{const value=model.explode();$('explode').setAttribute('aria-pressed',value);$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки';$('inspect').setAttribute('aria-pressed','false')};
+ $('explode').onclick=()=>{const on=model.explode();$('explode').setAttribute('aria-pressed',on);$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки';$('inspect').setAttribute('aria-pressed','false')};
  for(const id of ['front','top','rear','reset-view'])$(id).onclick=()=>{model.setView(id);if(id==='reset-view')$('inspect').setAttribute('aria-pressed','false')};
  $('zoom-in').onclick=()=>model.zoom(-1);$('zoom-out').onclick=()=>model.zoom(1);
- $('inspect').onclick=()=>{const active=$('inspect').getAttribute('aria-pressed')!=='true';$('inspect').setAttribute('aria-pressed',model.detail(active));if(active){$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки';}};
- $('inspect-part').onchange=e=>{model.focus(e.target.value);$('inspect').setAttribute('aria-pressed',model.detail(true));$('cover').setAttribute('aria-pressed','true');$('cover').textContent='Без крышки';};
- $('full-scene').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await $('visual-panel').requestFullscreen()}catch{$('server-status').textContent='Полноэкранный режим недоступен в этом браузере.'}};
-}catch(err){$('server-loading').innerHTML='Не удалось загрузить модель.<button class="tool" id="retry-3d">Повторить</button>';$('retry-3d').onclick=()=>location.reload();console.error(err)}
-}
-start3D();
+ $('inspect').onclick=()=>{model.focus($('inspect-part').value);$('inspect').setAttribute('aria-pressed',model.detail($('inspect').getAttribute('aria-pressed')!=='true'));refreshInspect()};
+ $('inspect-part').onchange=()=>inspect($('inspect-part').value);
+ $('full-scene').onclick=async()=>{if($('visual-panel').classList.contains('expanded-view')){$('visual-panel').classList.remove('expanded-view');return}try{if(document.fullscreenElement)await document.exitFullscreen();else await $('visual-panel').requestFullscreen()}catch{$('visual-panel').classList.add('expanded-view')}};
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')$('visual-panel').classList.remove('expanded-view')});
+}catch(e){$('server-loading').innerHTML='Модель не загрузилась. Подбор комплектующих доступен.<button class="tool" onclick="location.reload()">Повторить</button>';console.error(e)}})();
 })();

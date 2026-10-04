@@ -72,9 +72,16 @@ export async function createServerScene({host,getState,onPart,onReady}) {
      box(g,1,.026,1.52,0,-.123,2.41,m.dark);box(g,.94,.018,1.40,0,-.10,2.43,m.edge);box(g,.90,.06,.025,0,-.06,1.69,m.steel);
      for(const sx of [-.40,.40])for(const sz of [1.91,2.68])screw(g,sx,-.083,sz);
      box(g,.28,.045,.035,.12,-.023,2.00,m.black);box(g,.22,.011,.009,.12,-.003,1.98,m.gold);
-     for(const side of [-1,1])box(g,.025,.22,1.36,side*.475,.015,2.45);
-     if(i<s.driveCount){roundBox(g,.70,.07,1.00,0,-.025,2.5,m.edge,.012);label(g,'SATA SSD / '+s.driveTB+' TB',.56,.28,0,.024,2.46);for(const dx of [-.3,.3])screw(g,dx,.02,2.12)}
-     roundBox(g,.98,.27,.10,0,0,3.21,m.black,.014);
+     for(const side of [-1,1])box(g,.01,.25,1.46,side*.51425,.015,2.43);
+     if(i<s.driveCount){
+       if(s.driveKind==='HDD'){
+         box(g,1.0185,.24,1.47,0,.006,2.42,m.dark);roundBox(g,1.0185,.026,1.47,0,.139,2.42,m.edge,.006);
+         const hub=cyl(g,.22,.008,.06,.158,2.53,m.steel,36);ring(g,.26,.008,.06,.165,2.53,m.edge).rotation.x=-Math.PI/2;
+         label(g,'SEAGATE EXOS 7E10 / 8TB',.70,.49,0,.165,2.29);for(const dx of [-.46,.46])for(const dz of [1.79,3.06])screw(g,dx,.163,dz);
+       }else{box(g,.80,.025,1.25,0,-.070,2.40,m.black);roundBox(g,.699,.07,1.00,0,-.025,2.5,m.dark,.012);label(g,'Kingston DC600M / '+s.driveTB+'TB',.58,.53,0,.024,2.46);for(const dx of [-.3,.3])screw(g,dx,.023,2.12)}
+     }
+
+     roundBox(g,1.03,.27,.10,0,0,3.21,m.black,.014);
      for(let row=0;row<3;row++)for(let col=0;col<14;col++)box(g,.026,.033,.005,-.43+col*.052,-.07+row*.06,3.263,m.steel);
      // Raised curved handle, a latch and status light, not a painted rectangle.
      tube(g,[[-.40,-.07,3.27],[-.30,-.045,3.315],[.20,-.045,3.315],[.35,-.07,3.27]],.020,m.dark);roundBox(g,.085,.13,.035,.405,0,3.28,i<s.driveCount?m.red:m.dark,.01);
@@ -98,35 +105,36 @@ export async function createServerScene({host,getState,onPart,onReady}) {
    for(let i=0;i<18;i++){const x=-1.28+(i%6)*.31,z=-1.35+Math.floor(i/6)*.17;box(board,.042,.03,.08,x,.15,z,m.white)}
    box(board,.33,.055,.39,-1.22,.18,-1.52,m.edge);for(let i=0;i<10;i++)box(board,.017,.1,.38,-1.36+i*.032,.23,-1.52,m.steel);
    for(let i=0;i<2;i++){box(board,.20,.05,.80,-1.90+i*.29,.16,-.81,m.dark);box(board,.16,.025,.70,-1.90+i*.29,.198,-.81,m.pcb)}
-   const cpus=group('cpu'),memory=group('memory');
+   const cpus=group('cpu'),heatsinks=group('heatsink'),memory=group('memory');
    for(let i=0;i<2;i++){
      const x=.19,z=i?-2.29:-.67;
      roundBox(board,.78,.036,.95,x,.164,z,m.dark,.012);box(board,.71,.025,.88,x,.19,z,m.edge);
      if(i<s.cpuCount){
        const g=new T.Group();g.position.y=lift*.92;cpus.add(g);item('cpu',g);
-       box(g,.53,.036,.69,x,.228,z,m.pcb);roundBox(g,.47,.022,.61,x,.258,z,m.edge,.02);
-       const sink=new T.Group();sink.position.y=lift*.40;g.add(sink);
+       box(g,.565,.018,.775,x,.228,z,m.pcb);roundBox(g,.49,.034,.68,x,.252,z,m.edge,.01);label(g,'Intel Xeon '+s.cpuName,.40,.18,x,.277,z);for(const dx of [-.257,.257])for(let n=0;n<9;n++)box(g,.023,.008,.027,x+dx,.244,z-.29+n*.072,m.gold);
+       const sink=new T.Group();sink.position.y=lift*1.32;heatsinks.add(sink);
        box(sink,.80,.055,.96,x,.30,z,m.copper);box(sink,.86,.045,1.00,x,.35,z,m.edge);
-       const finHeight=s.cpuW>240?.40:.32;
+       const finHeight=.32;
        for(let n=0;n<36;n++)box(sink,.012,finHeight,.96,x-.403+n*.023,.38+finHeight/2,z,m.steel);
        for(const dx of [-.37,.37])for(const dz of [-.42,.42]){cyl(sink,.036,.13,x+dx,.64,z+dz,m.dark);screw(sink,x+dx,.714,z+dz)}
-       label(sink,'CPU '+(i+1)+' / '+s.cpuCores+' CORES',.66,.27,x,.385+finHeight,z);
-     }else{box(board,.67,.055,.84,x,.24,z,m.black);label(board,'CPU 2 / EMPTY',.53,.22,x,.270,z)}
-     const perCPU=Math.floor(s.ramCount/s.cpuCount)+(i<s.ramCount%s.cpuCount?1:0);
+       label(sink,'LGA4677 / CPU '+(i+1),.66,.20,x,.385+finHeight,z);
+     }else{box(board,.67,.055,.84,x,.24,z,m.black);label(board,'CPU '+(i+1)+' / EMPTY',.53,.22,x,.270,z)}
+     const perCPU=s.cpuCount?Math.floor(s.ramCount/s.cpuCount):0;const populated=({1:['A'],2:['A','G'],4:['A','C','E','G'],6:['A','C','D','E','F','G'],8:['A','B','C','D','E','F','G','H']})[perCPU]||[];
      for(let j=0;j<8;j++){
        const side=j%2===0?-1:1,bank=Math.floor(j/2),mx=x+side*(.51+bank*.115);
        box(board,.057,.065,1.38,mx,.18,z,m.blue);box(board,.019,.011,1.28,mx,.218,z,m.dark);
        for(const end of [-1,1])roundBox(board,.065,.09,.075,mx,.224,z+end*.69,m.white,.006);
-       if(i<s.cpuCount&&j<perCPU){
+       if(i<s.cpuCount&&populated.includes(['A','E','B','F','C','G','D','H'][j])){
          const g=new T.Group();g.position.y=lift*.8;memory.add(g);item('memory',g);// DDR5 DIMM envelope: 133.35 × 31.25 mm, keyed contact edge.
          const shape=new T.Shape();shape.moveTo(-.66675,-.15625);shape.lineTo(.003,-.15625);shape.lineTo(.003,-.111);shape.lineTo(.025,-.111);shape.lineTo(.025,-.15625);shape.lineTo(.66675,-.15625);
          shape.lineTo(.66675,-.055);shape.lineTo(.645,-.055);shape.lineTo(.645,-.022);shape.lineTo(.66675,-.022);shape.lineTo(.66675,.15625);shape.lineTo(-.66675,.15625);shape.lineTo(-.66675,-.022);shape.lineTo(-.645,-.022);shape.lineTo(-.645,-.055);shape.lineTo(-.66675,-.055);shape.closePath();
          const geo=new T.ExtrudeGeometry(shape,{depth:.013,bevelEnabled:false,steps:1});geo.translate(0,0,-.0065);geo.rotateY(-Math.PI/2);const pcb=new T.Mesh(geo,m.pcb);pcb.position.set(mx,.355,z);g.add(pcb);
          // Contact fingers share one geometry per side rather than hundreds of draw calls.
          for(const face of [-1,1]){const a=[];for(let pin=0;pin<144;pin++){const cz=pin<72?-.629+pin*.00865:.035+(pin-72)*.00865;const x=mx+face*.007,y=.202,z0=z+cz-.00265,z1=z+cz+.00265;const q=[[x,y,z0],[x,y+.034,z0],[x,y+.034,z1],[x,y,z0],[x,y+.034,z1],[x,y,z1]];if(face<0)q.reverse();q.forEach(v=>a.push(...v))}const pads=new T.BufferGeometry();pads.setAttribute('position',new T.Float32BufferAttribute(a,3));pads.computeVertexNormals();g.add(new T.Mesh(pads,m.gold));}
-         for(let n=0;n<10;n++)for(const face of [-1,1]){const cz=z-.58+n*.128;box(g,.018,.116,.085,mx+face*.016,.371,cz,m.black);for(let j=0;j<2;j++)box(g,.004,.015,.017,mx+face*.010,.27+j*.022,cz+.043,m.white);}
-         for(const face of [-1,1]){box(g,.014,.043,.07,mx+face*.014,.465,z-.17,m.black);box(g,.014,.052,.064,mx+face*.014,.458,z+.22,m.dark);}
-         const sticker=label(g,s.ramGB+'GB DDR5 / ECC',.45,.092,mx+.027,.379,z,false);sticker.rotation.y=Math.PI/2;
+         const chipRows=s.ramChips===40?2:1,faces=s.ramChips===10?[1]:[-1,1];
+         for(let n=0;n<10;n++)for(const face of faces)for(let row=0;row<chipRows;row++){const cz=z-.58+n*.128,cy=chipRows===2?.30+row*.115:.365;box(g,.018,chipRows===2?.092:.116,.085,mx+face*.016,cy,cz,m.black);box(g,.004,.016,.017,mx+face*.010,.478,cz+.043,m.white);}
+         for(const face of [-1,1]){box(g,.014,.039,.055,mx+face*.014,.464,z-.17,m.black);}
+         const sticker=label(g,'Kingston '+s.ramGB+'GB / '+s.ramName,.51,.087,mx+.027,.379,z,false);sticker.rotation.y=Math.PI/2;
        }
      }
    }
@@ -150,7 +158,7 @@ export async function createServerScene({host,getState,onPart,onReady}) {
      const g=new T.Group();g.position.z=exploded?-.70-i*.28:0;g.position.y=exploded?i*.25:0;psu.add(g);item('psu',g);
      const x=1.73,y=.23+i*.405,z=-1.51;roundBox(g,.76,.385,3.36,x,y,z,m.steel,.008);
      box(g,.67,.008,2.81,x,y+.201,z+.12,m.edge);box(g,.57,.004,1.05,x,y+.209,z+.12,m.steel);
-     label(g,s.psuW+'W / HOT SWAP',.57,.32,x,y+.213,-2.54);
+     label(g,'SUPERMICRO PWS-1K23A-1R',.57,.32,x,y+.213,-2.54);
      box(g,.72,.365,.04,x,y,-3.215,m.dark);
      for(let row=0;row<3;row++)for(let col=0;col<6;col++)box(g,.049,.041,.007,x-.29+col*.067,y-.095+row*.078,-3.24,m.black);
      roundBox(g,.23,.16,.045,x+.18,y,-3.26,m.black,.017);tube(g,[[x-.28,y-.1,-3.25],[x-.28,y-.1,-3.44],[x+.26,y-.1,-3.44],[x+.26,y-.1,-3.25]],.023,m.edge);
@@ -159,9 +167,24 @@ export async function createServerScene({host,getState,onPart,onReady}) {
    // Tidy routed power loom and SAS cables; no wire crosses a CPU or fan opening.
    for(let i=0;i<7;i++){const x=1.08+i*.035;tube(board,[[1.5,.25,.28],[1.25,.64,.28],[x,.57,-.03],[x,.28,-.34]],.018,i%3===0?m.red:i%3===1?m.yellow:m.wire)}
    for(let i=0;i<2;i++){tube(board,[[-1.89+i*.06,.23,-.42],[-2.04+i*.06,.30,.2],[-2.02+i*.06,.24,1.24],[-1.25+i*.25,.28,1.51]],.027,m.black);box(board,.20,.10,.14,-1.25+i*.25,.25,1.51,m.dark)}
-   const nic=group('network');nic.position.y=lift*.6;pcbSurface(nic,.55,1.22,-1.60,.38,-2.55);box(nic,.23,.045,.33,-1.60,.43,-2.55,m.edge);for(let i=0;i<8;i++)box(nic,.017,.10,.31,-1.70+i*.028,.49,-2.55,m.steel);
-   box(nic,.62,.48,.029,-1.60,.44,-3.245,m.edge);for(let i=0;i<2;i++){box(nic,.19,.14,.14,-1.76+i*.27,.45,-3.27,m.edge);box(nic,.15,.10,.005,-1.76+i*.27,.45,-3.344,m.black)}
-   const raid=group('raid');raid.position.y=lift*.45;pcbSurface(raid,.39,.90,-.97,.38,-2.68);box(raid,.29,.09,.35,-.97,.44,-2.65,m.dark);for(let i=0;i<7;i++)box(raid,.025,.1,.31,-1.07+i*.035,.52,-2.65,m.edge);
+   // Real low-profile PCIe boards stand vertically in motherboard slots.
+   const nic=group('network');nic.position.y=lift*.6;
+   const raid=group('raid');raid.position.y=lift*.45;
+   function expansion(parent,x,length,kind){
+     const card=new T.Group();parent.add(card);item(kind==='nic'?'network':'raid',card);
+     const z=-3.20+length/2;box(card,.016,.686,length,x,.526,z,m.pcb);
+     for(let n=0;n<49;n++)box(card,.019,.043,.007,x,.197,-3.04+n*.013,m.gold);
+     box(card,.17,.794,.019,x,.504,-3.234,m.edge);box(card,.20,.025,.12,x,.899,-3.20,m.edge);
+     box(card,.047,.30,.41,x+.032,.56,z,m.dark);
+     for(let n=0;n<14;n++)box(card,.12,.012,.42,x+.10,.42+n*.021,z,m.steel);
+     for(let n=0;n<7;n++){box(card,.021,.084,.095,x+.02,.78,-3.04+n*.19,m.black);box(card,.023,.03,.04,x+.023,.27,-3.04+n*.18,m.white)}
+     if(kind==='nic'){
+       for(let port=0;port<2;port++){box(card,.15,.16,.40,x+.082,.33+port*.24,-3.12,m.edge);box(card,.12,.12,.006,x+.082,.33+port*.24,-3.325,m.black);box(card,.019,.017,.007,x-.023,.33+port*.24,-3.33,m.led);}
+     }else{box(card,.09,.22,.16,x+.05,.54,z+length/2-.10,m.black);box(card,.09,.30,.47,x+.045,.47,-2.97,m.black);}
+     const sticker=label(card,kind==='nic'?'AOC-S25G-i2S':'AOC-S3908L-H8IR',.67,.09,x+.13,.75,z,false);sticker.rotation.y=Math.PI/2;
+   }
+   if(s.network===1)expansion(nic,-1.77,1.549,'nic');
+   if(s.controller===1)expansion(raid,-1.22,1.6764,'raid');
    const cover=group('cover');cover.visible=!coverOpen;const cy=exploded?2.55:.905;box(cover,4.30,.026,6.42,0,cy,0,m.steel);for(const x of [-2.13,2.13])box(cover,.025,.11,6.38,x,cy-.044,0,m.steel);roundBox(cover,.56,.025,.33,0,cy+.028,-1.10,m.dark,.01);box(cover,.38,.028,.12,0,cy+.054,-1.1,m.black);label(cover,'KLAMAS / RACK SERVER',1.10,.30,-.97,cy+.019,1.3);
    applyView();requestDraw();
  }
@@ -174,9 +197,9 @@ export async function createServerScene({host,getState,onPart,onReady}) {
    for(const [name,list] of Object.entries(inspectItems))for(let i=0;i<list.length;i++)list[i].visible=!detail||i===0;
    if(detail&&focused==='drive'){for(const o of groups.drive[0].children)if(!inspectItems.drive.includes(o))o.visible=false;}
    else if(!detail){for(const o of groups.drive[0].children)o.visible=true;}
-   if(detail&&groups[focused]){const b=new T.Box3();for(const g of (inspectItems[focused]?.slice(0,1)||groups[focused]))b.expandByObject(g);b.getCenter(target);const size=b.getSize(new T.Vector3());distance=Math.max(3.4,size.length()*1.65);}
+   if(detail&&groups[focused]&&groups[focused].some(g=>g.children.length)){const b=new T.Box3();for(const g of (inspectItems[focused]?.slice(0,1)||groups[focused]))b.expandByObject(g);b.getCenter(target);const size=b.getSize(new T.Vector3());distance=Math.max(2.35,size.length()*1.65);}
    else target.set(0,exploded?.75:.30,0);
-   host.classList.toggle('detail-mode',detail);const names={cpu:'Процессор и радиатор',memory:'Модуль DDR5 ECC',drive:'Корзина и накопитель',psu:'Модуль питания',network:'Сетевой адаптер',raid:'RAID-контроллер',board:'Материнская плата',cooling:'Вентилятор 80 мм',platform:'Корпус 2U'};document.getElementById('model-caption').textContent=detail?names[focused]:'Rack Server 2U';document.getElementById('model-subtitle').textContent=detail?'Одна деталь из вашей конфигурации':'437 × 647 × 89 мм';highlight(focused);
+   host.classList.toggle('detail-mode',detail);const names={cpu:'Процессор и радиатор',memory:'Модуль DDR5 ECC',drive:'Корзина и накопитель',psu:'Модуль питания',network:'Сетевой адаптер',raid:'RAID-контроллер',board:'Материнская плата',cooling:'Вентилятор 80 мм',platform:'Корпус 2U'};const s=getState();const title={cpu:'Intel Xeon '+s.cpuName,memory:'Kingston Server Premier '+s.ramGB+' GB',drive:s.driveKind==='HDD'?'Seagate Exos 7E10':'Kingston DC600M',psu:'Supermicro PWS-1K23A-1R',network:s.networkName,raid:s.controllerName,board:'Supermicro X13DEI-T',platform:'CSE-825BTS-R1K23LPP1',cooling:'Охлаждение платформы'};document.getElementById('model-caption').textContent=detail?title[focused]:'Supermicro SYS-621P-TRT';document.getElementById('model-subtitle').textContent=detail?({cpu:'77,5 × 56,5 мм · LGA4677',memory:'133,35 × 31,25 мм · DDR5 ECC RDIMM',drive:s.driveKind==='HDD'?'101,85 × 147 × 26,11 мм · 3.5″ SATA':'69,9 × 100 × 7 мм · 2.5″ SATA',network:'154,9 × 68,6 мм · PCIe ×8',raid:'167,64 × 68,83 мм · PCIe ×8',psu:'76 × 40 × 336 мм'}[focused]||'Узел платформы'):'437 × 647 × 89 мм · X13DEI-T';highlight(focused);
  }
  function draw(){
    frame=0;camera.position.set(target.x+Math.sin(theta)*Math.sin(phi)*distance,target.y+Math.cos(phi)*distance,target.z+Math.cos(theta)*Math.sin(phi)*distance);camera.lookAt(target);camera.updateMatrixWorld();renderer.render(scene,camera);
@@ -191,6 +214,6 @@ export async function createServerScene({host,getState,onPart,onReady}) {
  for(const evt of ['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(evt,e=>{pointers.delete(e.pointerId);pinch=0});
  canvas.addEventListener('wheel',e=>{e.preventDefault();distance=Math.max(2.2,Math.min(22,distance+e.deltaY*.009));requestDraw()},{passive:false});
  canvas.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','-','='].includes(e.key))return;e.preventDefault();theta+=e.key==='ArrowLeft'?-.15:e.key==='ArrowRight'?.15:0;phi=Math.max(.12,Math.min(1.55,phi+(e.key==='ArrowUp'?-.12:e.key==='ArrowDown'?.12:0)));distance=Math.max(2.2,Math.min(22,distance+(e.key==='-'?.7:['+','='].includes(e.key)?-.7:0)));requestDraw()});
- const api={rebuild:build,focus(k){focused=k;highlight(k);if(detail){applyView();requestDraw()}},detail(value){detail=value&&!!focused;if(detail){coverOpen=true;theta=['memory','network'].includes(focused)?1.1:.38;phi=.92;}else distance=exploded?15:12.7;applyView();requestDraw();return detail},setView(view){if(view==='front'){theta=0;phi=1.52}else if(view==='top'){theta=0;phi=.12}else if(view==='rear'){theta=Math.PI;phi=1.27}else{theta=.38;phi=.92;distance=exploded?15:12.7;detail=false;applyView()}requestDraw()},cover(){coverOpen=!coverOpen;exploded=false;detail=false;distance=12.7;build();return coverOpen},explode(){exploded=!exploded;coverOpen=true;detail=false;distance=exploded?15:12.7;build();return exploded},zoom(n){distance=Math.max(2.2,Math.min(22,distance+n));requestDraw()},isSoftware:renderer.isSoftware};
+ const api={rebuild:build,focus(k){focused=k;highlight(k);if(detail){applyView();requestDraw()}},detail(value){detail=value&&!!focused&&!!groups[focused]?.some(g=>g.children.length);if(detail){coverOpen=true;theta=['memory','network'].includes(focused)?1.1:.38;phi=.92;}else distance=exploded?15:12.7;applyView();requestDraw();return detail},setView(view){if(view==='front'){theta=0;phi=1.52}else if(view==='top'){theta=0;phi=.12}else if(view==='rear'){theta=Math.PI;phi=1.27}else{theta=.38;phi=.92;distance=exploded?15:12.7;detail=false;applyView()}requestDraw()},cover(){coverOpen=!coverOpen;exploded=false;detail=false;distance=12.7;build();return coverOpen},explode(){exploded=!exploded;coverOpen=true;detail=false;distance=exploded?15:12.7;build();return exploded},zoom(n){distance=Math.max(2.2,Math.min(22,distance+n));requestDraw()},isSoftware:renderer.isSoftware};
  build();resize();onReady?.(api);return api;
 }
