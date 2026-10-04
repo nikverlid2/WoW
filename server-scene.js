@@ -172,16 +172,44 @@ export async function createServerScene({host,getState,onPart,onReady}) {
    const raid=group('raid');raid.position.y=lift*.45;
    function expansion(parent,x,length,kind){
      const card=new T.Group();parent.add(card);item(kind==='nic'?'network':'raid',card);
-     const z=-3.20+length/2;box(card,.016,.686,length,x,.526,z,m.pcb);
-     for(let n=0;n<49;n++)box(card,.019,.043,.007,x,.197,-3.04+n*.013,m.gold);
+     const z=-3.20+length/2,end=-3.20+length;
+     box(card,.016,.686,length,x,.526,z,m.pcb);
+     // PCIe x8 contact edge: two banks separated by the key.
+     for(const side of [-1,1])for(let n=0;n<49;n++){const pz=-3.02+n*.013+(n>10?.035:0);box(card,.003,.043,.008,x+side*.009,.197,pz,m.gold)}
      box(card,.17,.794,.019,x,.504,-3.234,m.edge);box(card,.20,.025,.12,x,.899,-3.20,m.edge);
-     box(card,.047,.30,.41,x+.032,.56,z,m.dark);
-     for(let n=0;n<14;n++)box(card,.12,.012,.42,x+.10,.42+n*.021,z,m.steel);
-     for(let n=0;n<7;n++){box(card,.021,.084,.095,x+.02,.78,-3.04+n*.19,m.black);box(card,.023,.03,.04,x+.023,.27,-3.04+n*.18,m.white)}
+     const chip=(cy,cz,h=.11,d=.12)=>{box(card,.025,h,d,x+.022,cy,cz,m.black);for(const e of [-1,1])for(let i=0;i<4;i++)box(card,.007,.009,.012,x+.026,cy-h/2+i*h/3,cz+e*(d/2+.007),m.edge)};
+     const smd=(cy,cz)=>{box(card,.016,.019,.031,x+.017,cy,cz,m.dark);for(const e of [-1,1])box(card,.017,.020,.006,x+.018,cy,cz+e*.015,m.edge)};
      if(kind==='nic'){
-       for(let port=0;port<2;port++){box(card,.15,.16,.40,x+.082,.33+port*.24,-3.12,m.edge);box(card,.12,.12,.006,x+.082,.33+port*.24,-3.325,m.black);box(card,.019,.017,.007,x-.023,.33+port*.24,-3.33,m.led);}
-     }else{box(card,.09,.22,.16,x+.05,.54,z+length/2-.10,m.black);box(card,.09,.30,.47,x+.045,.47,-2.97,m.black);}
-     const sticker=label(card,kind==='nic'?'AOC-S25G-i2S':'AOC-S3908L-H8IR',.67,.09,x+.13,.75,z,false);sticker.rotation.y=Math.PI/2;
+       // Placement follows the manufacturer's AOC-S25G-i2S photograph:
+       // two cages, broad segmented heatsink, rear controller/header cluster.
+       const hz=-2.40;box(card,.034,.55,.69,x+.03,.545,hz,m.edge);
+       for(let row=0;row<10;row++)for(let col=0;col<8;col++)box(card,.10,.022,.075,x+.097,.30+row*.052,hz-.307+col*.087,m.steel);
+       for(const cy of [.29,.80])for(const cz of [hz-.30,hz+.30]){const pin=cyl(card,.025,.13,0,0,0,m.dark);pin.rotation.z=Math.PI/2;pin.position.set(x+.078,cy,cz)}
+       for(let port=0;port<2;port++){
+         const cy=.345+port*.30,px=x+.085;
+         box(card,.145,.16,.43,px,cy,-3.07,m.edge);
+         box(card,.12,.126,.008,px,cy,-3.29,m.black);
+         for(const dy of [-.065,.065])box(card,.116,.008,.018,px,cy+dy,-3.300,m.steel);
+         for(let r=0;r<2;r++)for(let n=0;n<5;n++)box(card,.002,.016,.022,x+.159,cy-.04+r*.08,-3.19+n*.075,m.dark);
+         box(card,.019,.017,.007,x-.023,cy,-3.25,m.led);
+       }
+       chip(.69,end-.20,.16,.17);chip(.47,end-.14,.064,.081);
+       box(card,.046,.035,.28,x+.033,.29,end-.18,m.black);
+       for(let n=0;n<12;n++)box(card,.009,.038,.009,x+.059,.293,end-.307+n*.024,m.gold);
+       for(let n=0;n<9;n++)smd(.365+(n%3)*.075,end-.35+Math.floor(n/3)*.09);
+       const sticker=label(card,'AOC-S25G-i2S',.35,.06,x+.031,.815,end-.22,false);sticker.rotation.y=Math.PI/2;
+     }else{
+       // SAS3908 board has a continuous fin stack, front cache chips and
+       // internal cable connectors at the opposite end; no external ports.
+       const hz=end-.49;box(card,.035,.57,.70,x+.029,.54,hz,m.edge);
+       for(let n=0;n<17;n++)box(card,.10,.018,.68,x+.096,.275+n*.033,hz,m.steel);
+       for(const cy of [.275,.807])for(const cz of [hz-.31,hz+.31]){const pin=cyl(card,.025,.115,0,0,0,m.white);pin.rotation.z=Math.PI/2;pin.position.set(x+.075,cy,cz)}
+       for(const cy of [.32,.55,.74])for(const cz of [-3.04,-2.79])chip(cy,cz,.13,.16);
+       for(let n=0;n<9;n++)smd(.27+(n%3)*.18,-2.65+Math.floor(n/3)*.066);
+       for(let n=0;n<2;n++){const cy=.42+n*.23;box(card,.08,.15,.15,x+.05,cy,end-.08,m.edge);box(card,.056,.115,.010,x+.06,cy,end+.002,m.black)}
+       for(let n=0;n<8;n++)box(card,.042,.01,.01,x+.032,.83,-3.05+n*.022,m.gold);
+       for(let row=0;row<11;row++)for(let col=0;col<3;col++)box(card,.025,.025,.002,x-.05+col*.047,.19+row*.058,-3.245,m.dark);
+     }
    }
    if(s.network===1)expansion(nic,-1.77,1.549,'nic');
    if(s.controller===1)expansion(raid,-1.22,1.6764,'raid');
